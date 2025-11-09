@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { withAuth } from '@/lib/withAuth'
+import TipTapEditor from '@/components/Editor/TipTapEditor'
 import prisma from '@/lib/prisma'
 import styles from '@/styles/PostForm.module.css'
 
@@ -182,20 +183,11 @@ function EditPost({ post: initialPost }) {
               <label htmlFor="content" className={styles.label}>
                 Содержание *
               </label>
-              <textarea
-                id="content"
-                name="content"
-                value={formData.content}
-                onChange={handleChange}
-                placeholder="Содержание поста"
-                rows="15"
-                required
-                className={styles.textarea}
-                disabled={loading}
+              <TipTapEditor
+                content={formData.content}
+                onChange={(html) => setFormData({ ...formData, content: html })}
+                placeholder="Содержание поста..."
               />
-              <p className={styles.hint}>
-                Пока используется простое текстовое поле. Позже будет добавлен TipTap редактор.
-              </p>
             </div>
 
             <div className={styles.row}>

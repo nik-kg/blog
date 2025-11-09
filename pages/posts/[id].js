@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import prisma from '@/lib/prisma'
 import { formatDate } from '@/lib/date'
+import PostContent from '@/components/PostContent'
 import styles from '@/styles/Post.module.css'
 
 export default function Post({ post }) {
@@ -91,10 +92,7 @@ export default function Post({ post }) {
             </div>
           )}
 
-          <div
-            className={styles.content}
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          <PostContent content={post.content} />
         </article>
       </div>
     </>
