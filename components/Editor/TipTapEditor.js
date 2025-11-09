@@ -6,14 +6,32 @@ import TextAlign from '@tiptap/extension-text-align'
 import Highlight from '@tiptap/extension-highlight'
 import Underline from '@tiptap/extension-underline'
 import Placeholder from '@tiptap/extension-placeholder'
-import { useState } from 'react'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import Youtube from '@tiptap/extension-youtube'
+import { useState, useEffect, useRef } from 'react'
+import { ReactRenderer } from '@tiptap/react'
+import tippy from 'tippy.js'
+import { Callout } from './extensions/Callout'
+import { SlashCommands, slashCommandsList } from './extensions/SlashCommands'
+import SlashMenu from './SlashMenu'
+import ColorPicker from './ColorPicker'
 import styles from './Editor.module.css'
 
-export default function TipTapEditor({ content, onChange, placeholder = 'Начните писать...' }) {
+export default function TipTapEditor({ content, onChange, placeholder = 'Начните писать или нажмите "/" для команд...' }) {
   const [imageUrl, setImageUrl] = useState('')
   const [showImageDialog, setShowImageDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
   const [showLinkDialog, setShowLinkDialog] = useState(false)
+  const [youtubeUrl, setYoutubeUrl] = useState('')
+  const [showYoutubeDialog, setShowYoutubeDialog] = useState(false)
+  const [textColor, setTextColor] = useState(null)
+  const [bgColor, setBgColor] = useState(null)
+  const fileInputRef = useRef(null)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -21,11 +39,17 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3, 4, 5, 6]
-        }
+        },
+        // Отключаем code и codeBlock
+        code: false,
+        codeBlock: false,
       }),
       Image.configure({
         inline: true,
-        allowBase64: true
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'editor-image',
+        },
       }),
       Link.configure({
         openOnClick: false,
@@ -37,11 +61,100 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
       TextAlign.configure({
         types: ['heading', 'paragraph']
       }),
-      Highlight,
+      Highlight.configure({
+        multicolor: true
+      }),
       Underline,
       Placeholder.configure({
         placeholder
-      })
+      }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'editor-table',
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      TextStyle,
+      Color,
+      Youtube.configure({
+        width: 640,
+        height: 360,
+        HTMLAttributes: {
+          class: 'editor-youtube',
+        },
+      }),
+      Callout,
+      SlashCommands.configure({
+        suggestion: {
+          items: ({ query }) => {
+            return slashCommandsList
+              .filter(item => {
+                const searchText = query.toLowerCase()
+                return (
+                  item.title.toLowerCase().includes(searchText) ||
+                  item.aliases?.some(alias => alias.toLowerCase().includes(searchText))
+                )
+              })
+              .slice(0, 10)
+          },
+          render: () => {
+            let component
+            let popup
+
+            return {
+              onStart: props => {
+                component = new ReactRenderer(SlashMenu, {
+                  props,
+                  editor: props.editor,
+                })
+
+                if (!props.clientRect) {
+                  return
+                }
+
+                popup = tippy('body', {
+                  getReferenceClientRect: props.clientRect,
+                  appendTo: () => document.body,
+                  content: component.element,
+                  showOnCreate: true,
+                  interactive: true,
+                  trigger: 'manual',
+                  placement: 'bottom-start',
+                })
+              },
+
+              onUpdate(props) {
+                component.updateProps(props)
+
+                if (!props.clientRect) {
+                  return
+                }
+
+                popup[0].setProps({
+                  getReferenceClientRect: props.clientRect,
+                })
+              },
+
+              onKeyDown(props) {
+                if (props.event.key === 'Escape') {
+                  popup[0].hide()
+                  return true
+                }
+
+                return component.ref?.onKeyDown(props)
+              },
+
+              onExit() {
+                popup[0].destroy()
+                component.destroy()
+              },
+            }
+          },
+        },
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -51,18 +164,53 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
     editorProps: {
       attributes: {
         class: styles.editorContent
-      }
+      },
+      handleDrop: (view, event, slice, moved) => {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+          event.preventDefault()
+          const file = event.dataTransfer.files[0]
+
+          if (file.type.startsWith('image/')) {
+            handleImageUploadFile(file)
+            return true
+          }
+        }
+        return false
+      },
     }
   })
 
+  useEffect(() => {
+    if (editor && textColor) {
+      editor.chain().focus().setColor(textColor).run()
+    }
+  }, [textColor, editor])
+
+  useEffect(() => {
+    if (editor && bgColor) {
+      editor.chain().focus().setHighlight({ color: bgColor }).run()
+    }
+  }, [bgColor, editor])
+
+  // Listen to custom events from slash commands
+  useEffect(() => {
+    const handleOpenImageDialog = () => setShowImageDialog(true)
+    const handleOpenVideoDialog = () => setShowYoutubeDialog(true)
+
+    window.addEventListener('openImageDialog', handleOpenImageDialog)
+    window.addEventListener('openVideoDialog', handleOpenVideoDialog)
+
+    return () => {
+      window.removeEventListener('openImageDialog', handleOpenImageDialog)
+      window.removeEventListener('openVideoDialog', handleOpenVideoDialog)
+    }
+  }, [])
+
   if (!editor) {
-    return null
+    return <div className={styles.loading}>Загрузка редактора...</div>
   }
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  const handleImageUploadFile = async (file) => {
     const formData = new FormData()
     formData.append('image', file)
 
@@ -84,6 +232,13 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
     }
   }
 
+  const handleFileInputChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleImageUploadFile(file)
+    }
+  }
+
   const handleAddImageUrl = () => {
     if (imageUrl) {
       editor.chain().focus().setImage({ src: imageUrl }).run()
@@ -100,9 +255,71 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
     }
   }
 
+  const handleAddYoutube = () => {
+    if (youtubeUrl) {
+      editor.chain().focus().setYoutubeVideo({ src: youtubeUrl }).run()
+      setYoutubeUrl('')
+      setShowYoutubeDialog(false)
+    }
+  }
+
   return (
     <div className={styles.editorWrapper}>
+      {/* Bubble Menu - commented out as BubbleMenu component not available in this TipTap version */}
+      {/* {editor && (
+        <div className={styles.bubbleMenu}>
+          <button
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={editor.isActive('bold') ? styles.active : ''}
+          >
+            <strong>B</strong>
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={editor.isActive('italic') ? styles.active : ''}
+          >
+            <em>I</em>
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={editor.isActive('underline') ? styles.active : ''}
+          >
+            <u>U</u>
+          </button>
+          <button
+            onClick={() => setShowLinkDialog(!showLinkDialog)}
+            className={editor.isActive('link') ? styles.active : ''}
+          >
+            🔗
+          </button>
+        </div>
+      )} */}
+
       <div className={styles.toolbar}>
+        {/* Format Dropdown */}
+        <div className={styles.toolbarGroup}>
+          <select
+            onChange={(e) => {
+              const value = e.target.value
+              if (value === 'p') {
+                editor.chain().focus().setParagraph().run()
+              } else if (value.startsWith('h')) {
+                const level = parseInt(value.substring(1))
+                editor.chain().focus().toggleHeading({ level }).run()
+              }
+            }}
+            className={styles.formatSelect}
+          >
+            <option value="p">Параграф</option>
+            <option value="h1">Заголовок 1</option>
+            <option value="h2">Заголовок 2</option>
+            <option value="h3">Заголовок 3</option>
+            <option value="h4">Заголовок 4</option>
+            <option value="h5">Заголовок 5</option>
+            <option value="h6">Заголовок 6</option>
+          </select>
+        </div>
+
         {/* Text formatting */}
         <div className={styles.toolbarGroup}>
           <button
@@ -137,50 +354,34 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
           >
             <s>S</s>
           </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleHighlight().run()}
-            className={editor.isActive('highlight') ? styles.active : ''}
-            title="Выделение"
-          >
-            🖍️
-          </button>
         </div>
 
-        {/* Headings */}
+        {/* Colors */}
         <div className={styles.toolbarGroup}>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={editor.isActive('heading', { level: 1 }) ? styles.active : ''}
-            title="Заголовок 1"
-          >
-            H1
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={editor.isActive('heading', { level: 2 }) ? styles.active : ''}
-            title="Заголовок 2"
-          >
-            H2
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className={editor.isActive('heading', { level: 3 }) ? styles.active : ''}
-            title="Заголовок 3"
-          >
-            H3
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().setParagraph().run()}
-            className={editor.isActive('paragraph') ? styles.active : ''}
-            title="Параграф"
-          >
-            P
-          </button>
+          <ColorPicker
+            type="text"
+            currentColor={textColor}
+            onSelect={(color) => {
+              if (color) {
+                editor.chain().focus().setColor(color).run()
+              } else {
+                editor.chain().focus().unsetColor().run()
+              }
+              setTextColor(color)
+            }}
+          />
+          <ColorPicker
+            type="background"
+            currentColor={bgColor}
+            onSelect={(color) => {
+              if (color && color !== 'transparent') {
+                editor.chain().focus().setHighlight({ color }).run()
+              } else {
+                editor.chain().focus().unsetHighlight().run()
+              }
+              setBgColor(color)
+            }}
+          />
         </div>
 
         {/* Lists */}
@@ -191,7 +392,7 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
             className={editor.isActive('bulletList') ? styles.active : ''}
             title="Маркированный список"
           >
-            • List
+            • Список
           </button>
           <button
             type="button"
@@ -199,7 +400,7 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
             className={editor.isActive('orderedList') ? styles.active : ''}
             title="Нумерованный список"
           >
-            1. List
+            1. Список
           </button>
           <button
             type="button"
@@ -207,7 +408,7 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
             className={editor.isActive('blockquote') ? styles.active : ''}
             title="Цитата"
           >
-            " Quote
+            &ldquo; Цитата
           </button>
         </div>
 
@@ -239,6 +440,32 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
           </button>
         </div>
 
+        {/* Callout Blocks */}
+        <div className={styles.toolbarGroup}>
+          <div className={styles.dropdown}>
+            <button type="button" className={styles.dropdownTrigger} title="Блоки">
+              ⚠️ Блоки ▼
+            </button>
+            <div className={styles.dropdownMenu}>
+              <button type="button" onClick={() => editor.chain().focus().setCallout('info').run()}>
+                💡 Инфо
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().setCallout('warning').run()}>
+                ⚠️ Предупреждение
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().setCallout('success').run()}>
+                ✅ Успех
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().setCallout('danger').run()}>
+                ❌ Ошибка
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().setCallout('quote').run()}>
+                💬 Цитата
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Insert */}
         <div className={styles.toolbarGroup}>
           <button
@@ -252,19 +479,31 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
           <button
             type="button"
             onClick={() => setShowImageDialog(!showImageDialog)}
-            title="Добавить изображение"
+            title="Добавить изображение (URL)"
           >
             🖼️
           </button>
-          <label className={styles.uploadButton} title="Загрузить изображение">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            title="Загрузить изображение"
+          >
             📤
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              style={{ display: 'none' }}
-            />
-          </label>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileInputChange}
+            style={{ display: 'none' }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowYoutubeDialog(!showYoutubeDialog)}
+            title="Вставить видео YouTube"
+          >
+            📹
+          </button>
           <button
             type="button"
             onClick={() => editor.chain().focus().setHorizontalRule().run()}
@@ -274,24 +513,39 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
           </button>
         </div>
 
-        {/* Code */}
+        {/* Table */}
         <div className={styles.toolbarGroup}>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleCode().run()}
-            className={editor.isActive('code') ? styles.active : ''}
-            title="Код (inline)"
-          >
-            &lt;/&gt;
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-            className={editor.isActive('codeBlock') ? styles.active : ''}
-            title="Блок кода"
-          >
-            {'{ }'}
-          </button>
+          <div className={styles.dropdown}>
+            <button type="button" className={styles.dropdownTrigger} title="Таблица">
+              📊 Таблица ▼
+            </button>
+            <div className={styles.dropdownMenu}>
+              <button type="button" onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
+                Вставить таблицу
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().addColumnBefore().run()}>
+                Добавить столбец слева
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()}>
+                Добавить столбец справа
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()}>
+                Удалить столбец
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().addRowBefore().run()}>
+                Добавить строку сверху
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()}>
+                Добавить строку снизу
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().deleteRow().run()}>
+                Удалить строку
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().deleteTable().run()}>
+                Удалить таблицу
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Utils */}
@@ -376,6 +630,35 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
               onClick={() => {
                 setShowImageDialog(false)
                 setImageUrl('')
+              }}
+              className={styles.dialogButtonSecondary}
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* YouTube Dialog */}
+      {showYoutubeDialog && (
+        <div className={styles.dialog}>
+          <input
+            type="url"
+            placeholder="https://www.youtube.com/watch?v=..."
+            value={youtubeUrl}
+            onChange={(e) => setYoutubeUrl(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleAddYoutube()}
+            className={styles.dialogInput}
+          />
+          <div className={styles.dialogButtons}>
+            <button type="button" onClick={handleAddYoutube} className={styles.dialogButtonPrimary}>
+              Вставить
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowYoutubeDialog(false)
+                setYoutubeUrl('')
               }}
               className={styles.dialogButtonSecondary}
             >

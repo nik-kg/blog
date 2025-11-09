@@ -292,6 +292,247 @@
   background: #c82333;
 }
 
+/* Bubble Menu */
+.bubbleMenu {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.bubbleMenu button {
+  padding: 4px 8px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bubbleMenu button:hover {
+  background: #f0f0f0;
+  border-color: #667eea;
+}
+
+.bubbleMenu button.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+/* Dropdowns */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdownTrigger {
+  padding: 6px 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.dropdownTrigger:hover {
+  background: #f0f0f0;
+  border-color: #667eea;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  z-index: 1000;
+  min-width: 180px;
+}
+
+.dropdownItem {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+  font-size: 14px;
+  text-align: left;
+  width: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdownItem:hover {
+  background: #f0f0f0;
+}
+
+.dropdownItem.active {
+  background: #667eea;
+  color: white;
+}
+
+/* Format Select */
+.formatSelect {
+  padding: 6px 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 120px;
+  height: 32px;
+}
+
+.formatSelect:hover {
+  border-color: #667eea;
+}
+
+/* Callout blocks in editor */
+.editorContent :global(.callout) {
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  border-left: 4px solid;
+  background: #f8f9fa;
+}
+
+.editorContent :global(.callout-info) {
+  border-left-color: #667eea;
+  background: #f0f3ff;
+}
+
+.editorContent :global(.callout-warning) {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.editorContent :global(.callout-success) {
+  border-left-color: #10b981;
+  background: #f0fdf4;
+}
+
+.editorContent :global(.callout-danger) {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.editorContent :global(.callout-quote) {
+  border-left-color: #6b7280;
+  background: #f9fafb;
+  font-style: italic;
+}
+
+/* Tables in editor */
+.editorContent :global(.ProseMirror table) {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 16px 0;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.editorContent :global(.ProseMirror td),
+.editorContent :global(.ProseMirror th) {
+  min-width: 1em;
+  border: 1px solid #e0e0e0;
+  padding: 8px 12px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.editorContent :global(.ProseMirror th) {
+  font-weight: 700;
+  text-align: left;
+  background: #f9fafb;
+}
+
+.editorContent :global(.ProseMirror .selectedCell:after) {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(102, 126, 234, 0.1);
+  pointer-events: none;
+}
+
+.editorContent :global(.ProseMirror .column-resize-handle) {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: #667eea;
+  pointer-events: none;
+}
+
+.editorContent :global(.tableWrapper) {
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+/* YouTube embeds in editor */
+.editorContent :global(.ProseMirror iframe[data-youtube-video]) {
+  max-width: 100%;
+  width: 640px;
+  height: 360px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.editorContent :global(.ProseMirror .youtube-wrapper) {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  margin: 16px 0;
+}
+
+.editorContent :global(.ProseMirror .youtube-wrapper iframe) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+/* Loading state */
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .toolbar {
@@ -314,5 +555,26 @@
   .editorContent {
     padding: 15px;
     min-height: 300px;
+  }
+
+  .bubbleMenu button {
+    padding: 3px 6px;
+    font-size: 12px;
+    min-width: 24px;
+    height: 24px;
+  }
+
+  .formatSelect {
+    min-width: 100px;
+    font-size: 12px;
+  }
+
+  .editorContent :global(.ProseMirror table) {
+    font-size: 14px;
+  }
+
+  .editorContent :global(.ProseMirror td),
+  .editorContent :global(.ProseMirror th) {
+    padding: 6px 8px;
   }
 }

@@ -144,6 +144,97 @@
   border-radius: 2px;
 }
 
+/* Callout blocks */
+.content .callout {
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border-left: 4px solid;
+  background: #f8f9fa;
+}
+
+.content .callout-info {
+  border-left-color: #667eea;
+  background: #f0f3ff;
+}
+
+.content .callout-warning {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.content .callout-success {
+  border-left-color: #10b981;
+  background: #f0fdf4;
+}
+
+.content .callout-danger {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.content .callout-quote {
+  border-left-color: #6b7280;
+  background: #f9fafb;
+  font-style: italic;
+}
+
+/* Tables */
+.content table {
+  border-collapse: collapse;
+  table-layout: auto;
+  width: 100%;
+  margin: 20px 0;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.content td,
+.content th {
+  border: 1px solid #e0e0e0;
+  padding: 10px 14px;
+  vertical-align: top;
+  text-align: left;
+}
+
+.content th {
+  font-weight: 700;
+  background: #f9fafb;
+}
+
+.content tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* YouTube embeds */
+.content iframe[data-youtube-video] {
+  max-width: 100%;
+  width: 640px;
+  height: 360px;
+  border-radius: 8px;
+  margin: 20px 0;
+  display: block;
+}
+
+.content .youtube-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  margin: 20px 0;
+}
+
+.content .youtube-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
 @media (max-width: 768px) {
   .content {
     font-size: 1rem;
@@ -164,5 +255,24 @@
   .content pre {
     padding: 15px;
     font-size: 0.85rem;
+  }
+
+  .content table {
+    font-size: 0.9rem;
+  }
+
+  .content td,
+  .content th {
+    padding: 8px 10px;
+  }
+
+  .content .callout {
+    padding: 12px;
+  }
+
+  .content iframe[data-youtube-video] {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 }
