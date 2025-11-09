@@ -1,0 +1,263 @@
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.header {
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 30px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 5px 0;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: inline-block;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.buttonSecondary {
+  padding: 10px 20px;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-block;
+}
+
+.buttonSecondary:hover {
+  background: #667eea;
+  color: white;
+}
+
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.empty {
+  text-align: center;
+  padding: 100px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.empty p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.table {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: #f9f9f9;
+}
+
+.table th {
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.95rem;
+}
+
+.table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.postTitle {
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.postTitle:hover {
+  color: #667eea;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status.published {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.draft {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.categories {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.categoryBadge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #f0f0f0;
+  color: #667eea;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.noData {
+  color: #ccc;
+}
+
+.date {
+  color: #666;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.editButton,
+.toggleButton,
+.deleteButton {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+  background: transparent;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.editButton:hover,
+.toggleButton:hover,
+.deleteButton:hover {
+  transform: scale(1.1);
+}
+
+.editButton:active,
+.toggleButton:active,
+.deleteButton:active {
+  transform: scale(0.95);
+}
+
+.editButton {
+  opacity: 0.7;
+}
+
+.editButton:hover {
+  opacity: 1;
+}
+
+.deleteButton:disabled,
+.toggleButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .table {
+    overflow-x: auto;
+  }
+
+  .table table {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .main {
+    padding: 20px 10px;
+  }
+
+  .table th,
+  .table td {
+    padding: 12px 10px;
+    font-size: 0.85rem;
+  }
+}
