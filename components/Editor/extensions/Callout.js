@@ -11,10 +11,10 @@ export const Callout = Node.create({
     return {
       type: {
         default: 'info',
-        parseHTML: element => element.getAttribute('data-type'),
+        parseHTML: element => element.getAttribute('data-callout-type'),
         renderHTML: attributes => {
           return {
-            'data-type': attributes.type,
+            'data-callout-type': attributes.type,
           }
         },
       },
@@ -24,18 +24,19 @@ export const Callout = Node.create({
   parseHTML() {
     return [
       {
-        tag: 'div[data-type="callout"]',
+        tag: 'div.callout',
       },
     ]
   },
 
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ node }) {
+    const type = node.attrs.type || 'info'
     return [
       'div',
-      mergeAttributes(HTMLAttributes, {
-        'data-type': 'callout',
-        class: `callout callout-${HTMLAttributes.type || 'info'}`,
-      }),
+      {
+        class: `callout callout-${type}`,
+        'data-callout-type': type,
+      },
       0,
     ]
   },

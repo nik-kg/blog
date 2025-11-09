@@ -31,6 +31,8 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
   const [showYoutubeDialog, setShowYoutubeDialog] = useState(false)
   const [textColor, setTextColor] = useState(null)
   const [bgColor, setBgColor] = useState(null)
+  const [showCalloutsMenu, setShowCalloutsMenu] = useState(false)
+  const [showTableMenu, setShowTableMenu] = useState(false)
   const fileInputRef = useRef(null)
 
   const editor = useEditor({
@@ -443,26 +445,68 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
         {/* Callout Blocks */}
         <div className={styles.toolbarGroup}>
           <div className={styles.dropdown}>
-            <button type="button" className={styles.dropdownTrigger} title="Блоки">
+            <button
+              type="button"
+              className={styles.dropdownTrigger}
+              onClick={() => setShowCalloutsMenu(!showCalloutsMenu)}
+              title="Блоки"
+            >
               ⚠️ Блоки ▼
             </button>
-            <div className={styles.dropdownMenu}>
-              <button type="button" onClick={() => editor.chain().focus().setCallout('info').run()}>
-                💡 Инфо
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().setCallout('warning').run()}>
-                ⚠️ Предупреждение
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().setCallout('success').run()}>
-                ✅ Успех
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().setCallout('danger').run()}>
-                ❌ Ошибка
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().setCallout('quote').run()}>
-                💬 Цитата
-              </button>
-            </div>
+            {showCalloutsMenu && (
+              <div className={styles.dropdownMenu}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().setCallout('info').run()
+                    setShowCalloutsMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  💡 Инфо
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().setCallout('warning').run()
+                    setShowCalloutsMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  ⚠️ Предупреждение
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().setCallout('success').run()
+                    setShowCalloutsMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  ✅ Успех
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().setCallout('danger').run()
+                    setShowCalloutsMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  ❌ Ошибка
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().setCallout('quote').run()
+                    setShowCalloutsMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  💬 Цитата
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -516,35 +560,98 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
         {/* Table */}
         <div className={styles.toolbarGroup}>
           <div className={styles.dropdown}>
-            <button type="button" className={styles.dropdownTrigger} title="Таблица">
+            <button
+              type="button"
+              className={styles.dropdownTrigger}
+              onClick={() => setShowTableMenu(!showTableMenu)}
+              title="Таблица"
+            >
               📊 Таблица ▼
             </button>
-            <div className={styles.dropdownMenu}>
-              <button type="button" onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
-                Вставить таблицу
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().addColumnBefore().run()}>
-                Добавить столбец слева
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()}>
-                Добавить столбец справа
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()}>
-                Удалить столбец
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().addRowBefore().run()}>
-                Добавить строку сверху
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()}>
-                Добавить строку снизу
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().deleteRow().run()}>
-                Удалить строку
-              </button>
-              <button type="button" onClick={() => editor.chain().focus().deleteTable().run()}>
-                Удалить таблицу
-              </button>
-            </div>
+            {showTableMenu && (
+              <div className={styles.dropdownMenu}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+                    setShowTableMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  Вставить таблицу
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().addColumnBefore().run()
+                    setShowTableMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  Добавить столбец слева
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().addColumnAfter().run()
+                    setShowTableMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  Добавить столбец справа
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().deleteColumn().run()
+                    setShowTableMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  Удалить столбец
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().addRowBefore().run()
+                    setShowTableMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  Добавить строку сверху
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().addRowAfter().run()
+                    setShowTableMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  Добавить строку снизу
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().deleteRow().run()
+                    setShowTableMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  Удалить строку
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    editor.chain().focus().deleteTable().run()
+                    setShowTableMenu(false)
+                  }}
+                  className={styles.dropdownItem}
+                >
+                  Удалить таблицу
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
