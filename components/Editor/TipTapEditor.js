@@ -16,6 +16,7 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
   const [showLinkDialog, setShowLinkDialog] = useState(false)
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: {
