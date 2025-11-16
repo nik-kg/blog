@@ -578,3 +578,273 @@
     padding: 6px 8px;
   }
 }
+
+/* ========================================
+   BLOCK EDITOR STYLES (Notion-like)
+   ======================================== */
+
+.blockEditor {
+  background: white;
+  min-height: 500px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.editorContainer {
+  position: relative;
+  padding: 40px 80px;
+}
+
+.proseEditor {
+  outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #37352f;
+}
+
+/* Notion-style placeholder */
+.proseEditor :global(.ProseMirror p.is-editor-empty:first-child::before) {
+  color: #9ca3af;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Headings */
+.proseEditor :global(.ProseMirror h1) {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 32px 0 8px;
+  color: #111827;
+}
+
+.proseEditor :global(.ProseMirror h2) {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 24px 0 8px;
+  color: #111827;
+}
+
+.proseEditor :global(.ProseMirror h3) {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 20px 0 6px;
+  color: #111827;
+}
+
+.proseEditor :global(.ProseMirror h4) {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 16px 0 6px;
+  color: #111827;
+}
+
+.proseEditor :global(.ProseMirror h5),
+.proseEditor :global(.ProseMirror h6) {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 12px 0 4px;
+  color: #111827;
+}
+
+/* Paragraphs */
+.proseEditor :global(.ProseMirror p) {
+  margin: 8px 0;
+  line-height: 1.7;
+}
+
+/* Lists */
+.proseEditor :global(.ProseMirror ul),
+.proseEditor :global(.ProseMirror ol) {
+  margin: 8px 0;
+  padding-left: 28px;
+}
+
+.proseEditor :global(.ProseMirror li) {
+  margin: 4px 0;
+  line-height: 1.6;
+}
+
+.proseEditor :global(.ProseMirror li p) {
+  margin: 0;
+}
+
+/* Blockquote */
+.proseEditor :global(.ProseMirror blockquote) {
+  border-left: 3px solid #d1d5db;
+  margin: 16px 0;
+  padding: 4px 0 4px 16px;
+  color: #6b7280;
+  font-style: normal;
+}
+
+/* Images */
+.proseEditor :global(.ProseMirror img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.proseEditor :global(.ProseMirror img:hover) {
+  transform: scale(1.02);
+}
+
+/* Links */
+.proseEditor :global(.ProseMirror a) {
+  color: #2563eb;
+  text-decoration: none;
+  border-bottom: 1px solid #bfdbfe;
+  transition: all 0.15s;
+}
+
+.proseEditor :global(.ProseMirror a:hover) {
+  border-bottom-color: #2563eb;
+  background: #eff6ff;
+}
+
+/* Inline formatting */
+.proseEditor :global(.ProseMirror strong) {
+  font-weight: 600;
+}
+
+.proseEditor :global(.ProseMirror em) {
+  font-style: italic;
+}
+
+.proseEditor :global(.ProseMirror u) {
+  text-decoration: underline;
+}
+
+.proseEditor :global(.ProseMirror s) {
+  text-decoration: line-through;
+}
+
+.proseEditor :global(.ProseMirror mark) {
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* Horizontal rule */
+.proseEditor :global(.ProseMirror hr) {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 24px 0;
+}
+
+/* Callout blocks */
+.proseEditor :global(.ProseMirror .callout) {
+  padding: 16px;
+  border-radius: 6px;
+  margin: 12px 0;
+  border-left: 3px solid;
+}
+
+.proseEditor :global(.ProseMirror .callout-info) {
+  border-left-color: #3b82f6;
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.proseEditor :global(.ProseMirror .callout-warning) {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.proseEditor :global(.ProseMirror .callout-success) {
+  border-left-color: #10b981;
+  background: #f0fdf4;
+  color: #065f46;
+}
+
+.proseEditor :global(.ProseMirror .callout-danger) {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.proseEditor :global(.ProseMirror .callout-quote) {
+  border-left-color: #6b7280;
+  background: #f9fafb;
+  color: #374151;
+  font-style: italic;
+}
+
+/* Tables */
+.proseEditor :global(.ProseMirror table) {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.proseEditor :global(.ProseMirror td),
+.proseEditor :global(.ProseMirror th) {
+  border: 1px solid #e5e7eb;
+  padding: 12px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+  min-width: 100px;
+}
+
+.proseEditor :global(.ProseMirror th) {
+  font-weight: 600;
+  text-align: left;
+  background: #f9fafb;
+}
+
+.proseEditor :global(.ProseMirror .selectedCell) {
+  background: #dbeafe;
+}
+
+/* YouTube embeds */
+.proseEditor :global(.ProseMirror iframe[data-youtube-video]) {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+/* Block hover effects - будут добавлены позже через NodeView */
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .editorContainer {
+    padding: 20px 16px;
+  }
+
+  .proseEditor :global(.ProseMirror h1) {
+    font-size: 32px;
+  }
+
+  .proseEditor :global(.ProseMirror h2) {
+    font-size: 28px;
+  }
+
+  .proseEditor :global(.ProseMirror h3) {
+    font-size: 22px;
+  }
+
+  .proseEditor :global(.ProseMirror table) {
+    font-size: 14px;
+  }
+
+  .proseEditor :global(.ProseMirror td),
+  .proseEditor :global(.ProseMirror th) {
+    padding: 8px;
+    min-width: 80px;
+  }
+}

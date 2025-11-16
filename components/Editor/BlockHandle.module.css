@@ -1,0 +1,100 @@
+.blockHandle {
+  position: absolute;
+  left: -40px;
+  top: 2px;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.handleButton {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: grab;
+  color: #9ca3af;
+  font-size: 16px;
+  padding: 0;
+  transition: all 0.15s;
+}
+
+.handleButton:hover {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.handleButton:active {
+  cursor: grabbing;
+}
+
+.menu {
+  position: absolute;
+  top: 0;
+  left: 30px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  min-width: 220px;
+  z-index: 100;
+  animation: slideIn 0.15s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.menuSection {
+  padding: 4px 0;
+}
+
+.menuLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #9ca3af;
+  padding: 4px 12px;
+  margin-bottom: 2px;
+  letter-spacing: 0.5px;
+}
+
+.menuItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.menuItem:hover {
+  background: #f3f4f6;
+}
+
+.menuDivider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 6px 0;
+}

@@ -19,21 +19,38 @@ import tippy from 'tippy.js'
 import { Callout } from './extensions/Callout'
 import { SlashCommands, slashCommandsList } from './extensions/SlashCommands'
 import SlashMenu from './SlashMenu'
-import ColorPicker from './ColorPicker'
+import FloatingMenu from './FloatingMenu'
 import styles from './Editor.module.css'
 
-export default function TipTapEditor({ content, onChange, placeholder = 'Начните писать или нажмите "/" для команд...' }) {
-  const [imageUrl, setImageUrl] = useState('')
-  const [showImageDialog, setShowImageDialog] = useState(false)
-  const [linkUrl, setLinkUrl] = useState('')
-  const [showLinkDialog, setShowLinkDialog] = useState(false)
-  const [youtubeUrl, setYoutubeUrl] = useState('')
-  const [showYoutubeDialog, setShowYoutubeDialog] = useState(false)
-  const [textColor, setTextColor] = useState(null)
-  const [bgColor, setBgColor] = useState(null)
-  const [showCalloutsMenu, setShowCalloutsMenu] = useState(false)
-  const [showTableMenu, setShowTableMenu] = useState(false)
+export default function TipTapEditor({
+  content,
+  onChange,
+  placeholder = '📝 Нажмите "/" для команд или просто начните писать...'
+}) {
+  const [mounted, setMounted] = useState(false)
   const fileInputRef = useRef(null)
+
+  // Обработка drag & drop для изображений
+  const handleDrop = (view, event, slice, moved) => {
+    if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+      const file = event.dataTransfer.files[0]
+
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const { schema } = view.state
+          const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
+
+          const node = schema.nodes.image.create({ src: e.target.result })
+          const transaction = view.state.tr.insert(coordinates.pos, node)
+          view.dispatch(transaction)
+        }
+        reader.readAsDataURL(file)
+        return true
+      }
+    }
+    return false
+  }
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -42,12 +59,11 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
         heading: {
           levels: [1, 2, 3, 4, 5, 6]
         },
-        // Отключаем code и codeBlock
         code: false,
         codeBlock: false,
       }),
       Image.configure({
-        inline: true,
+        inline: false,
         allowBase64: true,
         HTMLAttributes: {
           class: 'editor-image',
@@ -68,7 +84,9 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
       }),
       Underline,
       Placeholder.configure({
-        placeholder
+        placeholder,
+        showOnlyWhenEditable: true,
+        showOnlyCurrent: false,
       }),
       Table.configure({
         resizable: true,
@@ -159,623 +177,61 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Нач�
       }),
     ],
     content,
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML()
-      onChange(html)
-    },
     editorProps: {
+      handleDrop,
       attributes: {
-        class: styles.editorContent
+        class: styles.proseEditor,
       },
-      handleDrop: (view, event, slice, moved) => {
-        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
-          event.preventDefault()
-          const file = event.dataTransfer.files[0]
-
-          if (file.type.startsWith('image/')) {
-            handleImageUploadFile(file)
-            return true
-          }
-        }
-        return false
-      },
-    }
+    },
+    onUpdate: ({ editor }) => {
+      if (onChange) {
+        onChange(editor.getHTML())
+      }
+    },
   })
 
   useEffect(() => {
-    if (editor && textColor) {
-      editor.chain().focus().setColor(textColor).run()
-    }
-  }, [textColor, editor])
-
-  useEffect(() => {
-    if (editor && bgColor) {
-      editor.chain().focus().setHighlight({ color: bgColor }).run()
-    }
-  }, [bgColor, editor])
-
-  // Listen to custom events from slash commands
-  useEffect(() => {
-    const handleOpenImageDialog = () => setShowImageDialog(true)
-    const handleOpenVideoDialog = () => setShowYoutubeDialog(true)
-
-    window.addEventListener('openImageDialog', handleOpenImageDialog)
-    window.addEventListener('openVideoDialog', handleOpenVideoDialog)
-
-    return () => {
-      window.removeEventListener('openImageDialog', handleOpenImageDialog)
-      window.removeEventListener('openVideoDialog', handleOpenVideoDialog)
-    }
+    setMounted(true)
   }, [])
 
-  if (!editor) {
-    return <div className={styles.loading}>Загрузка редактора...</div>
-  }
-
-  const handleImageUploadFile = async (file) => {
-    const formData = new FormData()
-    formData.append('image', file)
-
-    try {
-      const response = await fetch('/api/images/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      if (response.ok) {
-        const { data } = await response.json()
-        editor.chain().focus().setImage({ src: data.image.url }).run()
-      } else {
-        alert('Ошибка при загрузке изображения')
-      }
-    } catch (error) {
-      console.error('Upload error:', error)
-      alert('Ошибка при загрузке изображения')
-    }
-  }
-
-  const handleFileInputChange = (e) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      handleImageUploadFile(file)
-    }
-  }
-
-  const handleAddImageUrl = () => {
-    if (imageUrl) {
-      editor.chain().focus().setImage({ src: imageUrl }).run()
-      setImageUrl('')
-      setShowImageDialog(false)
-    }
-  }
-
-  const handleSetLink = () => {
-    if (linkUrl) {
-      editor.chain().focus().setLink({ href: linkUrl }).run()
-      setLinkUrl('')
-      setShowLinkDialog(false)
-    }
-  }
-
-  const handleAddYoutube = () => {
-    if (youtubeUrl) {
-      editor.chain().focus().setYoutubeVideo({ src: youtubeUrl }).run()
-      setYoutubeUrl('')
-      setShowYoutubeDialog(false)
-    }
+  if (!editor || !mounted) {
+    return (
+      <div className={styles.editorWrapper}>
+        <div className={styles.loading}>Загрузка редактора...</div>
+      </div>
+    )
   }
 
   return (
-    <div className={styles.editorWrapper}>
-      {/* Bubble Menu - commented out as BubbleMenu component not available in this TipTap version */}
-      {/* {editor && (
-        <div className={styles.bubbleMenu}>
-          <button
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            className={editor.isActive('bold') ? styles.active : ''}
-          >
-            <strong>B</strong>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={editor.isActive('italic') ? styles.active : ''}
-          >
-            <em>I</em>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={editor.isActive('underline') ? styles.active : ''}
-          >
-            <u>U</u>
-          </button>
-          <button
-            onClick={() => setShowLinkDialog(!showLinkDialog)}
-            className={editor.isActive('link') ? styles.active : ''}
-          >
-            🔗
-          </button>
-        </div>
-      )} */}
+    <div className={styles.blockEditor}>
+      {/* Floating Menu for text selection */}
+      {editor && <FloatingMenu editor={editor} />}
 
-      <div className={styles.toolbar}>
-        {/* Format Dropdown */}
-        <div className={styles.toolbarGroup}>
-          <select
-            onChange={(e) => {
-              const value = e.target.value
-              if (value === 'p') {
-                editor.chain().focus().setParagraph().run()
-              } else if (value.startsWith('h')) {
-                const level = parseInt(value.substring(1))
-                editor.chain().focus().toggleHeading({ level }).run()
-              }
-            }}
-            className={styles.formatSelect}
-          >
-            <option value="p">Параграф</option>
-            <option value="h1">Заголовок 1</option>
-            <option value="h2">Заголовок 2</option>
-            <option value="h3">Заголовок 3</option>
-            <option value="h4">Заголовок 4</option>
-            <option value="h5">Заголовок 5</option>
-            <option value="h6">Заголовок 6</option>
-          </select>
-        </div>
-
-        {/* Text formatting */}
-        <div className={styles.toolbarGroup}>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            className={editor.isActive('bold') ? styles.active : ''}
-            title="Жирный (Ctrl+B)"
-          >
-            <strong>B</strong>
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={editor.isActive('italic') ? styles.active : ''}
-            title="Курсив (Ctrl+I)"
-          >
-            <em>I</em>
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={editor.isActive('underline') ? styles.active : ''}
-            title="Подчеркнутый"
-          >
-            <u>U</u>
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            className={editor.isActive('strike') ? styles.active : ''}
-            title="Зачеркнутый"
-          >
-            <s>S</s>
-          </button>
-        </div>
-
-        {/* Colors */}
-        <div className={styles.toolbarGroup}>
-          <ColorPicker
-            type="text"
-            currentColor={textColor}
-            onSelect={(color) => {
-              if (color) {
-                editor.chain().focus().setColor(color).run()
-              } else {
-                editor.chain().focus().unsetColor().run()
-              }
-              setTextColor(color)
-            }}
-          />
-          <ColorPicker
-            type="background"
-            currentColor={bgColor}
-            onSelect={(color) => {
-              if (color && color !== 'transparent') {
-                editor.chain().focus().setHighlight({ color }).run()
-              } else {
-                editor.chain().focus().unsetHighlight().run()
-              }
-              setBgColor(color)
-            }}
-          />
-        </div>
-
-        {/* Lists */}
-        <div className={styles.toolbarGroup}>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={editor.isActive('bulletList') ? styles.active : ''}
-            title="Маркированный список"
-          >
-            • Список
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={editor.isActive('orderedList') ? styles.active : ''}
-            title="Нумерованный список"
-          >
-            1. Список
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            className={editor.isActive('blockquote') ? styles.active : ''}
-            title="Цитата"
-          >
-            &ldquo; Цитата
-          </button>
-        </div>
-
-        {/* Alignment */}
-        <div className={styles.toolbarGroup}>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().setTextAlign('left').run()}
-            className={editor.isActive({ textAlign: 'left' }) ? styles.active : ''}
-            title="По левому краю"
-          >
-            ⬅️
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().setTextAlign('center').run()}
-            className={editor.isActive({ textAlign: 'center' }) ? styles.active : ''}
-            title="По центру"
-          >
-            ↔️
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().setTextAlign('right').run()}
-            className={editor.isActive({ textAlign: 'right' }) ? styles.active : ''}
-            title="По правому краю"
-          >
-            ➡️
-          </button>
-        </div>
-
-        {/* Callout Blocks */}
-        <div className={styles.toolbarGroup}>
-          <div className={styles.dropdown}>
-            <button
-              type="button"
-              className={styles.dropdownTrigger}
-              onClick={() => setShowCalloutsMenu(!showCalloutsMenu)}
-              title="Блоки"
-            >
-              ⚠️ Блоки ▼
-            </button>
-            {showCalloutsMenu && (
-              <div className={styles.dropdownMenu}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().setCallout('info').run()
-                    setShowCalloutsMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  💡 Инфо
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().setCallout('warning').run()
-                    setShowCalloutsMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  ⚠️ Предупреждение
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().setCallout('success').run()
-                    setShowCalloutsMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  ✅ Успех
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().setCallout('danger').run()
-                    setShowCalloutsMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  ❌ Ошибка
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().setCallout('quote').run()
-                    setShowCalloutsMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  💬 Цитата
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Insert */}
-        <div className={styles.toolbarGroup}>
-          <button
-            type="button"
-            onClick={() => setShowLinkDialog(!showLinkDialog)}
-            className={editor.isActive('link') ? styles.active : ''}
-            title="Добавить ссылку"
-          >
-            🔗
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowImageDialog(!showImageDialog)}
-            title="Добавить изображение (URL)"
-          >
-            🖼️
-          </button>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            title="Загрузить изображение"
-          >
-            📤
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileInputChange}
-            style={{ display: 'none' }}
-          />
-          <button
-            type="button"
-            onClick={() => setShowYoutubeDialog(!showYoutubeDialog)}
-            title="Вставить видео YouTube"
-          >
-            📹
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().setHorizontalRule().run()}
-            title="Горизонтальная линия"
-          >
-            ─
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className={styles.toolbarGroup}>
-          <div className={styles.dropdown}>
-            <button
-              type="button"
-              className={styles.dropdownTrigger}
-              onClick={() => setShowTableMenu(!showTableMenu)}
-              title="Таблица"
-            >
-              📊 Таблица ▼
-            </button>
-            {showTableMenu && (
-              <div className={styles.dropdownMenu}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
-                    setShowTableMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  Вставить таблицу
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().addColumnBefore().run()
-                    setShowTableMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  Добавить столбец слева
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().addColumnAfter().run()
-                    setShowTableMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  Добавить столбец справа
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().deleteColumn().run()
-                    setShowTableMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  Удалить столбец
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().addRowBefore().run()
-                    setShowTableMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  Добавить строку сверху
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().addRowAfter().run()
-                    setShowTableMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  Добавить строку снизу
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().deleteRow().run()
-                    setShowTableMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  Удалить строку
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    editor.chain().focus().deleteTable().run()
-                    setShowTableMenu(false)
-                  }}
-                  className={styles.dropdownItem}
-                >
-                  Удалить таблицу
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Utils */}
-        <div className={styles.toolbarGroup}>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().undo().run()}
-            disabled={!editor.can().undo()}
-            title="Отменить (Ctrl+Z)"
-          >
-            ↶
-          </button>
-          <button
-            type="button"
-            onClick={() => editor.chain().focus().redo().run()}
-            disabled={!editor.can().redo()}
-            title="Повторить (Ctrl+Y)"
-          >
-            ↷
-          </button>
-        </div>
+      {/* Main Editor Content */}
+      <div className={styles.editorContainer}>
+        <EditorContent editor={editor} className={styles.editorContent} />
       </div>
 
-      {/* Link Dialog */}
-      {showLinkDialog && (
-        <div className={styles.dialog}>
-          <input
-            type="url"
-            placeholder="https://example.com"
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSetLink()}
-            className={styles.dialogInput}
-          />
-          <div className={styles.dialogButtons}>
-            <button type="button" onClick={handleSetLink} className={styles.dialogButtonPrimary}>
-              Добавить
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowLinkDialog(false)
-                setLinkUrl('')
-              }}
-              className={styles.dialogButtonSecondary}
-            >
-              Отмена
-            </button>
-            {editor.isActive('link') && (
-              <button
-                type="button"
-                onClick={() => {
-                  editor.chain().focus().unsetLink().run()
-                  setShowLinkDialog(false)
-                }}
-                className={styles.dialogButtonDanger}
-              >
-                Удалить ссылку
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Image Dialog */}
-      {showImageDialog && (
-        <div className={styles.dialog}>
-          <input
-            type="url"
-            placeholder="https://example.com/image.jpg"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleAddImageUrl()}
-            className={styles.dialogInput}
-          />
-          <div className={styles.dialogButtons}>
-            <button type="button" onClick={handleAddImageUrl} className={styles.dialogButtonPrimary}>
-              Добавить
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowImageDialog(false)
-                setImageUrl('')
-              }}
-              className={styles.dialogButtonSecondary}
-            >
-              Отмена
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* YouTube Dialog */}
-      {showYoutubeDialog && (
-        <div className={styles.dialog}>
-          <input
-            type="url"
-            placeholder="https://www.youtube.com/watch?v=..."
-            value={youtubeUrl}
-            onChange={(e) => setYoutubeUrl(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleAddYoutube()}
-            className={styles.dialogInput}
-          />
-          <div className={styles.dialogButtons}>
-            <button type="button" onClick={handleAddYoutube} className={styles.dialogButtonPrimary}>
-              Вставить
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowYoutubeDialog(false)
-                setYoutubeUrl('')
-              }}
-              className={styles.dialogButtonSecondary}
-            >
-              Отмена
-            </button>
-          </div>
-        </div>
-      )}
-
-      <EditorContent editor={editor} />
+      {/* Hidden file input for image upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) {
+            const reader = new FileReader()
+            reader.onload = (event) => {
+              const src = event.target?.result
+              if (src && typeof src === 'string') {
+                editor.chain().focus().setImage({ src }).run()
+              }
+            }
+            reader.readAsDataURL(file)
+          }
+        }}
+      />
     </div>
   )
 }
