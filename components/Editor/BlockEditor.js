@@ -3,8 +3,9 @@ import dynamic from 'next/dynamic'
 import styles from './BlockEditor.module.css'
 
 // Динамический импорт IBE для избежания SSR проблем
+// ВАЖНО: используем /build (не /build-module) чтобы избежать SCSS и конфликтов
 const IsolatedBlockEditor = dynamic(
-  () => import('@automattic/isolated-block-editor').then(mod => mod.IsolatedBlockEditor),
+  () => import('@automattic/isolated-block-editor/build').then(mod => mod.IsolatedBlockEditor),
   { ssr: false }
 )
 
