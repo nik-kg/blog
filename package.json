@@ -40,6 +40,7 @@
   },
   "overrides": {
     "@ariakit/react": "0.4.19",
-    "@ariakit/core": "0.4.16"
+    "@ariakit/core": "0.4.16",
+    "date-fns": "3.6.0"
   }
 }
