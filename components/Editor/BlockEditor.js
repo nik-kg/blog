@@ -1,6 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import '@wordpress/format-library'
+
+// Импорт WordPress стилей
+import '@wordpress/components/build-style/style.css'
+import '@wordpress/block-editor/build-style/style.css'
+import '@wordpress/block-library/build-style/style.css'
+import '@wordpress/block-library/build-style/theme.css'
+
 import styles from './BlockEditor.module.css'
 
 // Динамический импорт IBE для избежания SSR проблем
