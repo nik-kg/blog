@@ -3,12 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@automattic/isolated-block-editor'],
 
-  // Externalize date-fns for better ESM handling
   experimental: {
-    esmExternals: 'loose',
+    esmExternals: 'loose', // Разрешаем смешивание ESM/CJS для date-fns
   },
 
-  webpack: (config, { isServer, webpack }) => {
+  webpack: (config, { isServer }) => {
     // Исправляем разрешение .mjs файлов для date-fns и других модулей
     config.resolve.extensionAlias = {
       '.js': ['.js', '.ts', '.tsx'],
@@ -20,23 +19,9 @@ const nextConfig = {
       config.resolve.extensions.push('.mjs')
     }
 
-    // Фикс "use client" директивы - заменяем CJS на ESM версии @ariakit
-    config.plugins.push(
-      new webpack.NormalModuleReplacementPlugin(
-        /@ariakit\/react\/cjs/,
-        (resource) => {
-          resource.request = resource.request.replace(/\/cjs\//, '/esm/')
-          resource.request = resource.request.replace(/\.cjs$/, '.mjs')
-        }
-      ),
-      new webpack.NormalModuleReplacementPlugin(
-        /@ariakit\/core\/cjs/,
-        (resource) => {
-          resource.request = resource.request.replace(/\/cjs\//, '/esm/')
-          resource.request = resource.request.replace(/\.cjs$/, '.mjs')
-        }
-      )
-    )
+    // ВАЖНО: Форсируем использование 'main' вместо 'module' для IBE
+    // Это заставляет webpack использовать build/index.js вместо build-module/index.js
+    config.resolve.mainFields = ['main', 'module']
 
     return config
   },
