@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@automattic/isolated-block-editor": "^2.29.0",
@@ -20,7 +21,7 @@
     "@wordpress/format-library": "^5.35.0",
     "bcryptjs": "^3.0.3",
     "formidable": "^3.5.4",
-    "next": "^15.0.0",
+    "next": "^14.2.33",
     "next-auth": "^4.24.13",
     "pg": "^8.16.3",
     "react": "^18.3.1",
@@ -31,6 +32,7 @@
     "css-loader": "^7.1.2",
     "eslint": "^8",
     "eslint-config-next": "^15.0.0",
+    "patch-package": "^8.0.1",
     "prisma": "^6.19.0"
   },
   "prisma": {
