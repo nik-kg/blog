@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { withAuth } from '@/lib/withAuth'
-import TipTapEditor from '@/components/Editor/TipTapEditor'
+import BlockEditor from '@/components/Editor/BlockEditor'
 import styles from '@/styles/PostForm.module.css'
 
 function NewPost() {
@@ -165,7 +165,7 @@ function NewPost() {
               <label htmlFor="content" className={styles.label}>
                 Содержание *
               </label>
-              <TipTapEditor
+              <BlockEditor
                 content={formData.content}
                 onChange={(html) => setFormData({ ...formData, content: html })}
                 placeholder="Начните писать содержание поста..."
