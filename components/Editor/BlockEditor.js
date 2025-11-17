@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import '@wordpress/format-library'
 import styles from './BlockEditor.module.css'
 
 // Динамический импорт IBE для избежания SSR проблем
@@ -17,8 +16,10 @@ export default function BlockEditor({ content = '', onChange, placeholder = 'Н�
 
   // Инициализация WordPress блоков
   useEffect(() => {
-    // Регистрируем все блоки WordPress
+    // Регистрируем все блоки WordPress и форматирование
     const initializeBlocks = async () => {
+      // Импортируем format-library динамически, чтобы избежать SSR проблем
+      await import('@wordpress/format-library')
       const { registerCoreBlocks } = await import('@wordpress/block-library')
       registerCoreBlocks()
       setIsReady(true)

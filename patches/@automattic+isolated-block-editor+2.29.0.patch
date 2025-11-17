@@ -1,8 +1,0 @@
-diff --git a/node_modules/@automattic/isolated-block-editor/node_modules/@ariakit/react/cjs/index.cjs b/node_modules/@automattic/isolated-block-editor/node_modules/@ariakit/react/cjs/index.cjs
-index 1234567..abcdefg 100644
---- a/node_modules/@automattic/isolated-block-editor/node_modules/@ariakit/react/cjs/index.cjs
-+++ b/node_modules/@automattic/isolated-block-editor/node_modules/@ariakit/react/cjs/index.cjs
-@@ -1,1 +1,2 @@
--"use strict";Object.defineProperty(exports, "__esModule", {value: true});"use client";
-+"use client";
-+"use strict";Object.defineProperty(exports, "__esModule", {value: true});
