@@ -4,8 +4,9 @@ import '@wordpress/format-library'
 import styles from './BlockEditor.module.css'
 
 // Динамический импорт IBE для избежания SSR проблем
+// Используем build версию (не build-module) для избежания SCSS и "use client" ошибок
 const IsolatedBlockEditor = dynamic(
-  () => import('@automattic/isolated-block-editor').then(mod => mod.IsolatedBlockEditor),
+  () => import('@automattic/isolated-block-editor/build').then(mod => mod.IsolatedBlockEditor),
   { ssr: false }
 )
 

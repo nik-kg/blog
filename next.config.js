@@ -14,6 +14,13 @@ const nextConfig = {
       config.resolve.extensions.push('.mjs')
     }
 
+    // Фикс "use client" директивы в @ariakit - заменяем CJS импорты на ESM
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@ariakit/react/cjs/index.cjs': '@ariakit/react/esm/index.mjs',
+      '@ariakit/core/cjs/index.cjs': '@ariakit/core/esm/index.mjs',
+    }
+
     return config
   },
 }
